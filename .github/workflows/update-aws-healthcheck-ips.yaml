@@ -1,6 +1,7 @@
 name: Update aws-healthcheck-ips.txt
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '20 20 * * *'
 
