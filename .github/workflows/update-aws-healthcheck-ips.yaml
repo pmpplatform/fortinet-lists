@@ -1,4 +1,4 @@
-name: Update index.html
+name: Update aws-healthcheck-ips.txt
 
 on:
   schedule:
