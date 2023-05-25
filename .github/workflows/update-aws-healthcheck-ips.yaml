@@ -1,0 +1,51 @@
+name: Update index.html
+
+on:
+  schedule:
+    - cron: '20 20 * * *'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          dir
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python update.py
+          dir
+
+      - name: Run update script
+        run: |
+          curl -s https://ip-ranges.amazonaws.com/ip-ranges.json | jq '.prefixes[] | select(.service == "ROUTE53_HEALTHCHECKS") | .ip_prefix' | tr -d \" > aws-healthcheck-ips.txt
+          cat aws-healthcheck-ips.txt
+          
+      - name: Commit files
+        id: commit
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git add aws-healthcheck-ips.txt
+          if [-z "$(git status --porcelain)"]; then
+             echo "::set-output name=push::false"
+          else
+             git commit -m "Add changes" -a
+             echo "::set-output name=push::true"
+          fi
+        shell: bash
+        
+      - name: Push changes
+        if: steps.commit.outputs.push == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+           github_token: ${{ secrets.GITHUB_TOKEN }}
