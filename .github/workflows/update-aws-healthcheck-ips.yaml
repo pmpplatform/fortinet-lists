@@ -20,11 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          dir
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python update.py
-          dir
+          apt install -y jq
 
       - name: Run update script
         run: |
